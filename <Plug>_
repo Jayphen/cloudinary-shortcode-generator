@@ -129,12 +129,6 @@ class ResultField extends Component {
 }
 
 class GalleryFactory extends Component {
-  renderGalleryItems = () => (
-    <GalleryDemo
-      galleryType  = {this.props.galleryType}
-      galleryItems = {this.props.galleryItems}
-    />
-  )
   render() {
     return (
       <div>
@@ -156,7 +150,6 @@ class GalleryFactory extends Component {
               galleryType  = {this.props.galleryType}
               galleryItems = {this.props.galleryItems}
             />
-            {this.props.galleryItems.length > 0 ? this.renderGalleryItems() : ''}
           </div>
           <div className="w-1/2 px-2">
             <Gallery
@@ -174,31 +167,12 @@ class GalleryFactory extends Component {
 class GalleryDemo extends Component {
   render() {
     return (
-      <CloudinaryContext cloudName="dxbygibug">
-        <h3 className="my-6">How it's gonna look:</h3>
-        <div className={`gallery mw8 center blog-post--gallery gallery--${this.props.galleryType}`}>
-          {this.props.galleryItems.map((data) => (
-            <GalleryDemoItem
-              id={data.public_id}
-              key={data.public_id}
-              landscape={data.width > data.height}
-            />
-          ))}
-        </div>
-      </CloudinaryContext>
-    )
-  }
-}
-class GalleryDemoItem extends Component {
-  render() {
-    return (
-      <div className={`gallery-item ${this.props.landscape ? 'gallery-item--landscape' : 'gallery-item--portrait'}`}>
-        <Image publicId={this.props.id}></Image>
+      <div className={`gallery mw8 center blog-post--gallery gallery--${this.props.galleryType}`}>
+        hello
       </div>
     )
   }
 }
-
 class Gallery extends Component {
   render() {
     return (
@@ -209,7 +183,7 @@ class Gallery extends Component {
             key={data.public_id}
             handleAltChange={this.props.handleAltChange}
             handleCaptionChange={this.props.handleCaptionChange}
-            showFields={true}
+            showFields={false}
           />
         ))}
       </CloudinaryContext>
@@ -252,6 +226,7 @@ class GalleryItem extends Component {
       <div className="flex mt-4">
         <div className="flex-1 text-center">
           <Image publicId={this.props.id} height="160">
+             <Transformation height="160" crop="scale"/>
           </Image>
         </div>
         {this.props.showFields ? this.renderFields() : null}
@@ -289,9 +264,9 @@ class GalleryType extends Component {
   }
 
   getTypes = () => {
-    const types = ['1x1', '2x2', '3x3', 'portrait', '1 portrait 2 landscape'];
+    const types = ['2x2', '4x4', '3x3'];
     return types.map((type, index) => (
-      <option key={`${type}_${index}`} value={type.replace(/ /g,"-")}>{type}</option>
+      <option key={`${type}_${index}`} value={type}>{type}</option>
     ))
   };
 

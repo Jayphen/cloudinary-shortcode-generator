@@ -11,6 +11,7 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const getClientEnvironment = require('./env');
 const tailwindcss = require('tailwindcss');
+const cssnext = require('postcss-cssnext');
 const paths = require('./paths');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -175,6 +176,7 @@ module.exports = {
                   ident: 'postcss',
                   plugins: () => [
                     tailwindcss('./tailwind.js'),
+                    cssnext(),
                     require('postcss-flexbugs-fixes'),
                     autoprefixer({
                       browsers: [
