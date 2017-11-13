@@ -111,7 +111,7 @@ class ResultField extends Component {
         <h3 className="mb-2">
           Your shortcode
           <CopyToClipboard
-            text={this.template()}
+            text={this.props.galleryItems.length === 0 ? 'Upload some images first pls' : this.template()}
             onCopy={() => this.setState({ copied: true })}
           >
             <span className="ml-3 underline text-xs cursor-pointer hover:text-purple">Copy to clipboard</span>
