@@ -91,8 +91,8 @@ class ResultField extends Component {
       "${item.height},
       ${item.width},
       https://res.cloudinary.com/dxbygibug/image/upload/v${item.version}/${item.public_id}.${item.format},
-      "${item.alt || 'null'}",
-      "${item.caption || 'null'}"
+      '${item.alt || 'null'}',
+      '${item.caption || 'null'}'
       "
     `.replace(/\s+/g, ' ')))
   )
