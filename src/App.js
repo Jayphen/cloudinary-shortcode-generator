@@ -9,7 +9,7 @@ const cloudinary = window.cloudinary;
 
 class App extends Component {
   state = {
-    galleryTitle: 'sample',
+    galleryTitle: '',
     galleryType: '2x2',
     galleryItems: []
   }
