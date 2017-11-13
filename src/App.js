@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios';
-import { CloudinaryContext, Transformation, Image } from 'cloudinary-react';
+import { CloudinaryContext, Image } from 'cloudinary-react';
 import {DebounceInput} from 'react-debounce-input';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
@@ -25,7 +25,11 @@ class App extends Component {
       .catch(err => console.log("No matching tags, but that's okay"));
   }
   handleUploads = (error, result) => {
-    this.setState({galleryItems: this.state.galleryItems.concat(result)});
+    if (!error) {
+      this.setState({galleryItems: this.state.galleryItems.concat(result)});
+    } else {
+      console.log(error);
+    }
   }
   handleAltChange = (id, val) => {
     this.setState({
