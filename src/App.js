@@ -330,7 +330,7 @@ class GalleryUploader extends Component {
     console.log(process.env.REACT_APP_CLOUDINARY_NAME);
     cloudinary.openUploadWidget({
       cloud_name:    process.env.REACT_APP_CLOUDINARY_NAME,
-      upload_preset: 'cz7yoj6y',
+      upload_preset: process.env.REACT_APP_CLOUDINARY_PRESET,
       tags: [this.props.galleryTitle.toLowerCase().replace(/ /g,"_"),'uploader'],
       sources: ['local','url','facebook','google_photos'],
     }, this.handleUploads);
