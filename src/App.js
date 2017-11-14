@@ -92,7 +92,7 @@ class ResultField extends Component {
       ${item.width},
       https://res.cloudinary.com/dxbygibug/image/upload/v${item.version}/${item.public_id}.${item.format},
       '${item.alt || 'null'}',
-      '${item.caption || 'null'}'
+      "${item.caption || 'null'}'
       "
     `.replace(/\s+/g, ' ')))
   )
@@ -142,8 +142,8 @@ class GalleryFactory extends Component {
   render() {
     return (
       <div>
-        <div className="flex">
-          <div className="w-1/2 px-2 text-left">
+        <div className="flex flex-wrap">
+          <div className="w-full md:w-1/2 px-2 text-left">
             <GalleryTitle
               galleryTitle={this.props.galleryTitle}
               handleTitleChange={this.props.handleTitleChange}
@@ -162,7 +162,7 @@ class GalleryFactory extends Component {
             />
             {this.props.galleryItems.length > 0 ? this.renderGalleryItems() : ''}
           </div>
-          <div className="w-1/2 px-2">
+          <div className="w-full md:w-1/2 px-2">
             <Gallery
               galleryItems={this.props.galleryItems}
               handleAltChange={this.props.handleAltChange}
