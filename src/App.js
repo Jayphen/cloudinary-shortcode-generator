@@ -18,7 +18,7 @@ class App extends Component {
     this.getGallery(title)
   }
   getGallery = (title) => {
-    axios.get(`https://res.cloudinary.com/dxbygibug/image/list/${title.toLowerCase().replace(/ /g,"_")}.json`)
+    axios.get(`https://res.cloudinary.com/${process.env.REACT_APP_CLOUDINARY_NAME}/image/list/${title.toLowerCase().replace(/ /g,"_")}.json`)
       .then(res => {
         this.setState({galleryItems: res.data.resources});
       })
@@ -90,7 +90,7 @@ class ResultField extends Component {
     data.map((item) => (`
       "${item.height},
       ${item.width},
-      https://res.cloudinary.com/dxbygibug/image/upload/v${item.version}/${item.public_id}.${item.format},
+      https://res.cloudinary.com/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload/v${item.version}/${item.public_id}.${item.format},
       '${item.alt || 'null'}',
       "${item.caption || 'null'}'
       "
@@ -178,7 +178,7 @@ class GalleryFactory extends Component {
 class GalleryDemo extends Component {
   render() {
     return (
-      <CloudinaryContext cloudName="dxbygibug">
+      <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
         <h3 className="my-6">How it's gonna look:</h3>
         <div className={`gallery mw8 center blog-post--gallery gallery--${this.props.galleryType}`}>
           {this.props.galleryItems.map((data) => (
@@ -206,7 +206,7 @@ class GalleryDemoItem extends Component {
 class Gallery extends Component {
   render() {
     return (
-      <CloudinaryContext cloudName="dxbygibug">
+      <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
         {this.props.galleryItems.map((data) => (
           <GalleryItem
             id={data.public_id}
@@ -327,8 +327,9 @@ class GalleryUploader extends Component {
   }
   uploadWidget = (e) => {
     e.preventDefault();
+    console.log(process.env.REACT_APP_CLOUDINARY_NAME);
     cloudinary.openUploadWidget({
-      cloud_name:    'dxbygibug',
+      cloud_name:    process.env.REACT_APP_CLOUDINARY_NAME,
       upload_preset: 'cz7yoj6y',
       tags: [this.props.galleryTitle.toLowerCase().replace(/ /g,"_"),'uploader'],
       sources: ['local','url','facebook','google_photos'],
