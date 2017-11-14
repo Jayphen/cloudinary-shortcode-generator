@@ -285,12 +285,12 @@ class GalleryItem extends Component {
   // Patched onKeyDown handler, make typing in inputs
   // work as expected. For example, spacebar can be used
   // as normal characters instead of a shortcut.
-  handleKeyDown = event => {
+  onKeyDown = event => {
     if (event.target.nodeName === 'INPUT') {
       return;
     }
     this.props.provided.dragHandleProps.onKeyDown(event);
-  }
+  };
   renderFields = () => (
     <div className="flex-1 ml-3">
       <div>
@@ -302,6 +302,7 @@ class GalleryItem extends Component {
         debounceTimeout={300}
         className="text-input"
         onMouseDown={e => e.stopPropagation()}
+        {this.onKeyDown}
         onChange={this.handleAltChange} />
       <div>
         <label className="py-2 inline-block" htmlFor={`${this.props.id}_caption`}>Caption text</label>
@@ -323,7 +324,6 @@ class GalleryItem extends Component {
       <div
         style={this.getStyles(this.props.provided.draggableStyle, this.props.snapshot.isDragging)}
         {...this.props.provided.dragHandleProps}
-        onKeyDown={this.handleKeyDown}
       >
         <div className="flex pt-4">
           <div className="flex-1 text-center">
