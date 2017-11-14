@@ -4,14 +4,40 @@ import axios from 'axios';
 import { CloudinaryContext, Image } from 'cloudinary-react';
 import {DebounceInput} from 'react-debounce-input';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const cloudinary = window.cloudinary;
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 class App extends Component {
   state = {
     galleryTitle: '',
-    galleryType: '2x2',
+    galleryType: 'alternating',
     galleryItems: []
+  }
+  onDragStart = () => {
+    console.log('starting drag');
+  }
+  onDragEnd = (result) => {
+     // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    const galleryItems = reorder(
+      this.state.galleryItems,
+      result.source.index,
+      result.destination.index
+    );
+
+    this.setState({ galleryItems });
   }
   titleChange = (title) => {
     this.setState({ galleryTitle: title });
@@ -74,6 +100,8 @@ class App extends Component {
             handleUploads       = {this.handleUploads}
             handleAltChange     = {this.handleAltChange}
             handleCaptionChange = {this.handleCaptionChange}
+            handleDragStart     = {this.onDragStart}
+            handleDragEnd       = {this.onDragEnd}
           />
         </form>
       </div>
@@ -165,9 +193,11 @@ class GalleryFactory extends Component {
           </div>
           <div className="w-full md:w-1/2 px-2">
             <Gallery
-              galleryItems={this.props.galleryItems}
-              handleAltChange={this.props.handleAltChange}
-              handleCaptionChange={this.props.handleCaptionChange}
+              galleryItems        = {this.props.galleryItems}
+              handleAltChange     = {this.props.handleAltChange}
+              handleCaptionChange = {this.props.handleCaptionChange}
+              onDragStart = {this.props.handleDragStart}
+              onDragEnd   = {this.props.handleDragEnd}
             />
           </div>
         </div>
@@ -208,15 +238,37 @@ class Gallery extends Component {
   render() {
     return (
       <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
-        {this.props.galleryItems.map((data) => (
-          <GalleryItem
-            id={data.public_id}
-            key={data.public_id}
-            handleAltChange={this.props.handleAltChange}
-            handleCaptionChange={this.props.handleCaptionChange}
-            showFields={true}
-          />
-        ))}
+        <DragDropContext
+          onDragStart = {this.props.onDragStart}
+          onDragEnd   = {this.props.onDragEnd}
+        >
+        <Droppable droppableId="droppable">
+          {(provided, snapshot) => (
+            <div ref={provided.innerRef}>
+              {this.props.galleryItems.map((data) => (
+                <Draggable key={data.public_id} draggableId={data.public_id}>
+                  {(provided, snapshot) => (
+                    <div>
+                      <div ref={provided.innerRef}>
+                        <GalleryItem
+                          id={data.public_id}
+                          key={data.public_id}
+                          handleAltChange={this.props.handleAltChange}
+                          handleCaptionChange={this.props.handleCaptionChange}
+                          showFields={true}
+                          provided={provided}
+                        />
+                      </div>
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
       </CloudinaryContext>
     )
   }
@@ -252,14 +304,22 @@ class GalleryItem extends Component {
         onChange={this.handleCaptionChange} />
     </div>
   )
+  getStyles = (provided) => ({
+    ...provided
+  })
   render() {
     return (
-      <div className="flex mt-4">
-        <div className="flex-1 text-center">
-          <Image publicId={this.props.id} height="160">
-          </Image>
+      <div
+        style={this.getStyles(this.props.provided.draggableStyle)}
+        {...this.props.provided.dragHandleProps}
+      >
+        <div className="flex pt-4">
+          <div className="flex-1 text-center">
+            <Image publicId={this.props.id} height="160">
+            </Image>
+          </div>
+          {this.props.showFields ? this.renderFields() : null}
         </div>
-        {this.props.showFields ? this.renderFields() : null}
       </div>
     )
   }
@@ -294,7 +354,7 @@ class GalleryType extends Component {
   }
 
   getTypes = () => {
-    const types = ['1x1', '2x2', '3x3', 'portrait', '1 portrait 2 landscape'];
+    const types = ['1x1', '2x2', '3x3', 'alternating', 'portrait', '1 portrait 2 landscape'];
     return types.map((type, index) => (
       <option key={`${type}_${index}`} value={type.replace(/ /g,"-")}>{type}</option>
     ))

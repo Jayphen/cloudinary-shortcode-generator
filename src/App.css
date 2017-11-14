@@ -26,6 +26,19 @@
   grid-area: portrait;
 }
 
+.gallery--alternating {
+  grid-template-areas:  none;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(100px, 35vh));
+  & .gallery-item {
+    grid-area: unset;
+  }
+  & .gallery-item:nth-child(6n+1),
+  & .gallery-item:nth-child(6n+5) {
+    grid-row: auto / span 2;
+  }
+}
+
 .gallery--3x3 {
   grid-template-columns: repeat(auto-fill, minmax(32%, 1fr));
   grid-template-rows: repeat(auto-fill, minmax(20vw, 1fr));
