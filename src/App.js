@@ -150,6 +150,7 @@ class GalleryFactory extends Component {
             />
             <GalleryType
               handleTypeChange={this.props.handleTypeChange}
+              galleryType  = {this.props.galleryType}
             />
             <GalleryUploader
               galleryTitle={this.props.galleryTitle}
