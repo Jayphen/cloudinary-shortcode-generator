@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios';
-import { CloudinaryContext, Image } from 'cloudinary-react';
-import {DebounceInput} from 'react-debounce-input';
-import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import GalleryContainer from './components/GalleryContainer'
 
-const cloudinary = window.cloudinary;
-
+// Re-order array given the array, the item being
+// moved, and where it is being moved to
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -21,9 +18,6 @@ class App extends Component {
     galleryTitle: '',
     galleryType: 'alternating',
     galleryItems: []
-  }
-  onDragStart = () => {
-    console.log('starting drag');
   }
   onDragEnd = (result) => {
      // dropped outside the list
@@ -39,7 +33,8 @@ class App extends Component {
 
     this.setState({ galleryItems });
   }
-  titleChange = (title) => {
+  titleChange = (e) => {
+    const title = e.target.value;
     this.setState({ galleryTitle: title });
     this.getGallery(title)
   }
@@ -91,7 +86,7 @@ class App extends Component {
       <div className="App container mx-auto px-4 py-8">
         <h1 className="mb-4">Let's create a lovely gallery</h1>
         <form>
-          <GalleryFactory
+          <GalleryContainer
             galleryTitle        = {this.state.galleryTitle}
             galleryItems        = {this.state.galleryItems}
             galleryType         = {this.state.galleryType}
@@ -100,7 +95,6 @@ class App extends Component {
             handleUploads       = {this.handleUploads}
             handleAltChange     = {this.handleAltChange}
             handleCaptionChange = {this.handleCaptionChange}
-            handleDragStart     = {this.onDragStart}
             handleDragEnd       = {this.onDragEnd}
           />
         </form>
@@ -109,317 +103,5 @@ class App extends Component {
   }
 }
 
-class ResultField extends Component {
-  state = {
-    copied: false
-  }
-
-  getShortcode = (data) => (
-    data.map((item) => (`
-      "${item.height},
-      ${item.width},
-      https://res.cloudinary.com/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload/v${item.version}/${item.public_id}.${item.format},
-      '${item.alt || 'null'}',
-      "${item.caption || 'null'}'
-      "
-    `.replace(/\s+/g, ' ')))
-  )
-  template = () => (`
-    {{ gallery "${this.props.galleryTitle}" "${this.props.galleryType}" ${this.getShortcode(this.props.galleryItems)} }}
-  `.replace(/\s+/g, ' '));
-
-  componentWillUpdate(prevProps, prevState) {
-    if (prevState.copied === true) {
-      window.setTimeout(() => {
-        this.setState({copied: false})},
-        1000
-      );
-    }
-  }
-
-  render() {
-    return (
-      <div className="mt-8">
-        <h3 className="mb-2">
-          Your shortcode
-          <CopyToClipboard
-            text={this.props.galleryItems.length === 0 ? 'Upload some images first pls' : this.template()}
-            onCopy={() => this.setState({ copied: true })}
-          >
-            <span className="ml-3 underline text-xs cursor-pointer hover:text-purple">Copy to clipboard</span>
-          </CopyToClipboard>
-          {this.state.copied ? <span className="text-red ml-3 text-xs">Copied!</span> : null}
-        </h3>
-        <textarea
-          disabled={this.props.galleryItems.length === 0}
-          value={this.props.galleryItems.length === 0 ? 'Upload some images first pls' : this.template()}
-          className="block min-h-8 w-full g-white border border-grey-light hover:border-grey px-3 py-2 rounded shadow"
-        />
-      </div>
-    )
-  }
-}
-
-class GalleryFactory extends Component {
-  renderGalleryItems = () => (
-    <GalleryDemo
-      galleryType  = {this.props.galleryType}
-      galleryItems = {this.props.galleryItems}
-    />
-  )
-  render() {
-    return (
-      <div>
-        <div className="flex flex-wrap">
-          <div className="w-full md:w-1/2 px-2 text-left">
-            <GalleryTitle
-              galleryTitle={this.props.galleryTitle}
-              handleTitleChange={this.props.handleTitleChange}
-            />
-            <GalleryType
-              handleTypeChange={this.props.handleTypeChange}
-              galleryType  = {this.props.galleryType}
-            />
-            <GalleryUploader
-              galleryTitle={this.props.galleryTitle}
-              handleUploads={this.props.handleUploads}
-            />
-            <ResultField
-              galleryTitle = {this.props.galleryTitle}
-              galleryType  = {this.props.galleryType}
-              galleryItems = {this.props.galleryItems}
-            />
-            {this.props.galleryItems.length > 0 ? this.renderGalleryItems() : ''}
-          </div>
-          <div className="w-full md:w-1/2 px-2">
-            <Gallery
-              galleryItems        = {this.props.galleryItems}
-              handleAltChange     = {this.props.handleAltChange}
-              handleCaptionChange = {this.props.handleCaptionChange}
-              onDragStart = {this.props.handleDragStart}
-              onDragEnd   = {this.props.handleDragEnd}
-            />
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
-
-class GalleryDemo extends Component {
-  render() {
-    return (
-      <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
-        <h3 className="my-6">How it's gonna look:</h3>
-        <div className={`gallery mw8 center blog-post--gallery gallery--${this.props.galleryType}`}>
-          {this.props.galleryItems.map((data) => (
-            <GalleryDemoItem
-              id={data.public_id}
-              key={data.public_id}
-              landscape={data.width > data.height}
-            />
-          ))}
-        </div>
-      </CloudinaryContext>
-    )
-  }
-}
-class GalleryDemoItem extends Component {
-  render() {
-    return (
-      <div className={`gallery-item ${this.props.landscape ? 'gallery-item--landscape' : 'gallery-item--portrait'}`}>
-        <Image publicId={this.props.id}></Image>
-      </div>
-    )
-  }
-}
-
-class Gallery extends Component {
-  render() {
-    return (
-      <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
-        <DragDropContext
-          onDragStart = {this.props.onDragStart}
-          onDragEnd   = {this.props.onDragEnd}
-        >
-        <Droppable droppableId="droppable">
-          {(provided, snapshot) => (
-            <div ref={provided.innerRef}>
-              {this.props.galleryItems.map((data) => (
-                <Draggable key={data.public_id} draggableId={data.public_id}>
-                  {(provided, snapshot) => (
-                    <div>
-                      <div ref={provided.innerRef}>
-                        <GalleryItem
-                          id={data.public_id}
-                          key={data.public_id}
-                          handleAltChange={this.props.handleAltChange}
-                          handleCaptionChange={this.props.handleCaptionChange}
-                          showFields={true}
-                          provided={provided}
-                          snapshot={snapshot}
-                        />
-                      </div>
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-      </CloudinaryContext>
-    )
-  }
-}
-
-class GalleryItem extends Component {
-  handleAltChange = (e) => {
-    this.props.handleAltChange(this.props.id, e.target.value);
-  }
-  handleCaptionChange = (e) => {
-    this.props.handleCaptionChange(this.props.id, e.target.value);
-  }
-  // Patched onKeyDown handler, make typing in inputs
-  // work as expected. For example, spacebar can be used
-  // as normal characters instead of a shortcut.
-  handleKeyDown = event => {
-    if (event.target.nodeName === 'INPUT') {
-      return;
-    }
-    this.props.provided.dragHandleProps.onKeyDown(event);
-  }
-  renderFields = () => (
-    <div className="flex-1 ml-3">
-      <div>
-        <label className="py-2 inline-block" htmlFor={`${this.props.id}_alt`}>Alt text <small>(for SEO)</small></label>
-      </div>
-      <DebounceInput
-        id={`${this.props.id}_alt`}
-        value={this.props.alt}
-        debounceTimeout={300}
-        className="text-input"
-        onMouseDown={e => e.stopPropagation()}
-        onChange={this.handleAltChange} />
-      <div>
-        <label className="py-2 inline-block" htmlFor={`${this.props.id}_caption`}>Caption text</label>
-      </div>
-      <DebounceInput
-        id={`${this.props.id}_caption`}
-        value={this.props.caption}
-        debounceTimeout={300}
-        onMouseDown={e => e.stopPropagation()}
-        className="text-input"
-        onChange={this.handleCaptionChange} />
-    </div>
-  )
-  getStyles = (provided, isDragging) => ({
-    ...provided
-  })
-  render() {
-    return (
-      <div
-        style={this.getStyles(this.props.provided.draggableStyle, this.props.snapshot.isDragging)}
-        {...this.props.provided.dragHandleProps}
-        onKeyDown={this.handleKeyDown}
-      >
-        <div className="flex pt-4">
-          <div className="flex-1 text-center">
-            <Image publicId={this.props.id} height="160">
-            </Image>
-          </div>
-          {this.props.showFields ? this.renderFields() : null}
-        </div>
-      </div>
-    )
-  }
-}
-
-class GalleryTitle extends Component {
-  handleTitleChange = (e) => {
-    this.props.handleTitleChange(e.target.value);
-  }
-
-  render() {
-    return (
-      <div className="mb-6">
-        <div>
-          <label className="py-2 inline-block" htmlFor="gtitle">Gallery title</label>
-        </div>
-        <DebounceInput
-          id="gtitle"
-          value={this.props.galleryTitle}
-          debounceTimeout={300}
-          onChange={this.handleTitleChange}
-          className="text-input"
-        />
-      </div>
-    )
-  }
-}
-
-class GalleryType extends Component {
-  handleTypeChange = (e) => {
-    this.props.handleTypeChange(e.target.value);
-  }
-
-  getTypes = () => {
-    const types = ['1x1', '2x2', '3x3', 'alternating', 'portrait', '1 portrait 2 landscape'];
-    return types.map((type, index) => (
-      <option key={`${type}_${index}`} value={type.replace(/ /g,"-")}>{type}</option>
-    ))
-  };
-
-  getTypeWarning = () => (
-    <div className="mt-3 text-xs text-red">Make sure you only use 1 portrait image for this gallery type, otherwise the second one will not display!</div>
-  )
-
-  render() {
-    return (
-      <div className="mb-8">
-        <div><label className="py-2 inline-block" htmlFor="gtype">Gallery type</label></div>
-        <div className="inline-block relative">
-          <select
-            id="gtype"
-            value={this.props.galleryType}
-            onChange={this.handleTypeChange}
-            className="block appearance-none bg-white border border-grey-light hover:border-grey px-4 py-2 pr-8 rounded shadow"
-          >
-            {this.getTypes()}
-          </select>
-          <div className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-slate">
-            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-          </div>
-        </div>
-        {this.props.galleryType.indexOf('portrait') != -1 ? this.getTypeWarning() : ''}
-      </div>
-    )
-  }
-}
-
-class GalleryUploader extends Component {
-  handleUploads = (error, result) => {
-    this.props.handleUploads(error, result)
-  }
-  uploadWidget = (e) => {
-    e.preventDefault();
-    console.log(process.env.REACT_APP_CLOUDINARY_NAME);
-    cloudinary.openUploadWidget({
-      cloud_name:    process.env.REACT_APP_CLOUDINARY_NAME,
-      upload_preset: process.env.REACT_APP_CLOUDINARY_PRESET,
-      tags: [this.props.galleryTitle.toLowerCase().replace(/ /g,"_"),'uploader'],
-      sources: ['local','url','facebook','google_photos'],
-    }, this.handleUploads);
-  }
-  render() {
-    return (
-      <div>
-        <button className="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded" onClick={this.uploadWidget}>Upload images</button>
-      </div>
-    )
-  }
-}
 
 export default App;
