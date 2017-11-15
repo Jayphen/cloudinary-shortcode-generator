@@ -7,8 +7,8 @@ const getItemShortcode = (data) => (
     "${item.height},
     ${item.width},
     https://res.cloudinary.com/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload/v${item.version}/${item.public_id}.${item.format},
-    '${item.alt || 'null'}',
-    "${item.caption || 'null'}'
+    ${item.alt || null},
+    ${item.caption || null}
     "
   `.replace(/\s+/g, ' ')))
 )
