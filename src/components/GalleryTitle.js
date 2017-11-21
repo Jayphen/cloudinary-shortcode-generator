@@ -1,5 +1,6 @@
 import React from 'react';
 import {DebounceInput} from 'react-debounce-input';
+import PropTypes from 'prop-types';
 
 const GalleryTitle = ({handleTitleChange, galleryTitle}) => {
   return (
@@ -16,6 +17,11 @@ const GalleryTitle = ({handleTitleChange, galleryTitle}) => {
       />
     </div>
   )
+}
+
+GalleryTitle.propTypes = {
+  handleTitleChange: PropTypes.func.isRequired,
+  galleryTitle: PropTypes.string.isRequired
 }
 
 export default GalleryTitle;

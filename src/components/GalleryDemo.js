@@ -1,6 +1,7 @@
 import React from 'react';
 import { CloudinaryContext } from 'cloudinary-react';
 import GalleryDemoItem from './GalleryDemoItem';
+import PropTypes from 'prop-types';
 
 const GalleryDemo = (props) =>
   <CloudinaryContext cloudName={process.env.REACT_APP_CLOUDINARY_NAME}>
@@ -15,5 +16,10 @@ const GalleryDemo = (props) =>
       ))}
     </div>
   </CloudinaryContext>
+
+GalleryDemo.propTypes = {
+  galleryType: PropTypes.string,
+  galleryItems: PropTypes.array
+}
 
 export default GalleryDemo;
